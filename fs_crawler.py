@@ -26,6 +26,16 @@ def md5_hash_content(fpath):
     return hash_func.hexdigest()
 
 def fs_stat(fpath):
+    """
+    Returns a python dictionary of basic information from unix stat
+
+    WARNING: DOES NOT FOLLOW SYMLINKS, often this results in a failed file open
+    due to quirks of how python3 works on linux. If this occurs, the stat info will be
+    null/none
+
+    :param fpath: string, path to file
+    :return:
+    """
 
     stat_dict = {}
     try:
@@ -52,12 +62,33 @@ def fs_stat(fpath):
     return stat_dict
 
 def get_extents(fpath):
+    """
+    Returns a python list of tuples,
+    representing block extent ranges affiliated with a given file
+
+    :param fpath: string, path to file
+    :return: python list of tuples
+    """
     pass
+    #TBC, relying on code sitting on another machine I dont have access to.
 
 def anonymize_path(hasher):
+    """
+    Does consistent, component by component, anonymization of a file path
+    using the hash or hash like object
+    :param hasher: hashlib like object
+    :return: anonymized path
+    """
     pass
 
 def new_fs_crawler_gen(path_root):
+    """
+    Crawls file system recursively from the specied root directory
+    :param path_root: full path to a root directory
+    :return: generator object for yielding a directory or file paths.
+    Note yields tuple, first being the path, second being a boolean identifying if its
+    a directory or file
+    """
 
     for root, dirs, files in os.walk(path_root):
         for name in files:
