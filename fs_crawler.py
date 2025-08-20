@@ -1,7 +1,7 @@
 import os
 from collections import deque
 import hashlib
-from logging import exception
+import csv
 
 MiB_8 = 8*1048576
 
@@ -72,14 +72,25 @@ def get_extents(fpath):
     pass
     #TBC, relying on code sitting on another machine I dont have access to.
 
-def anonymize_path(hasher):
+def anonymize_path(fpath, truncate_to=16):
     """
     Does consistent, component by component, anonymization of a file path
-    using the hash or hash like object
+    using sha 256
+
     :param hasher: hashlib like object
+    :truncate_to: optional int, how many characters to truncate the anonymized path to
+    ie only use the leading N characters. Defaults to 16 if not set
     :return: anonymized path
     """
-    pass
+    path_split = fpath.split("/")
+    anon_path = []
+    for idx in range(1, len(path_split)):
+        path_comp = str(hashlib.sha3_256(path_split[idx].encode("utf-8")).hexdigest())
+        anon_path.append(path_comp[0:truncate_to])
+
+    anon_string = "/"+"/".join(anon_path)
+
+    return anon_string
 
 def new_fs_crawler_gen(path_root):
     """
@@ -96,20 +107,38 @@ def new_fs_crawler_gen(path_root):
         for name in dirs:
             yield os.path.join(root, name), False
 
-if __name__ == "__main__":
+def writer(fhdl, write_list):
+    """
+    Output Writer TBD
+    :param fhdl: open pythong file handle
+    :param write_list: list of file stat dicts to write
+    :return: None
+    """
+    pass
 
-    crawler_gen = new_fs_crawler_gen("/home/")
-    hash_content = True
-    stat_dict = None
-    ext_dict = None
+
+def crawler_root(root_path, anon_path=False, hash_content=False, ext_track=False, outpath="fsnap", buffered_out=False):
+    """
+    Root crawler function
+
+    :param root_path: directory root to start crawl at
+    :param anon_path: boolean, should path be anonymized
+    :param hash_content: boolean, whether or not to hash file contents for tracking
+    :param ext_track: NOT YET IMPLEMENTED boolean, whether or not to track block file extents
+    :param outpath: file to store results it
+    :param buffered_out: whether or not to buffer and periodically flush stats, useful for large crawls to
+    reduce memory footprint
+    :return: None
+    """
     flist = deque()
-    anon_path = False
+    crawler_gen = new_fs_crawler_gen(root_path)
+    stat_dict=None
 
     for item, is_file in crawler_gen:
 
         hex_dig=None
-
         # grab relevant file stats
+        print(item)
         stat_dict = fs_stat(item)
 
         if is_file is True:
@@ -123,8 +152,19 @@ if __name__ == "__main__":
         stat_dict["content_hash"] = hex_dig
 
         if anon_path is True:
-            pass
+            anon_path_str = anonymize_path(item, 8)
+            stat_dict["fpath"] = anon_path_str
             #later integrate path anonymization
+        else:
+            stat_dict["fpath"] = item
 
-        stat_dict["fpath"] = item
-        print(stat_dict)
+        flist.append(stat_dict)
+
+if __name__ == "__main__":
+
+    hash_content = True
+    track_extents = False
+    anon_path = True
+
+    crawler_root("/home/",anon_path,hash_content, track_extents)
+
