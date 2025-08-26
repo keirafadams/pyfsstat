@@ -107,14 +107,19 @@ def new_fs_crawler_gen(path_root):
         for name in dirs:
             yield os.path.join(root, name), False
 
-def writer(fhdl, write_list):
+def writer(fhdl, write_list, write_header=False):
     """
     Output Writer TBD
-    :param fhdl: open pythong file handle
+    :param fhdl: open python file handle
     :param write_list: list of file stat dicts to write
     :return: None
     """
-    pass
+
+    # write the header if its the first line of the file
+    #
+    if write_header:
+
+
 
 
 def crawler_root(root_path, anon_path=False, hash_content=False, ext_track=False, outpath="fsnap", buffered_out=False):
