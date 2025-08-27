@@ -1,7 +1,8 @@
 import os
 from collections import deque
 import hashlib
-import csv
+from pyfiemap import get_ext_list
+
 
 MiB_8 = 8*1048576
 
@@ -114,11 +115,11 @@ def writer(fhdl, write_list, write_header=False):
     :param write_list: list of file stat dicts to write
     :return: None
     """
-
+    # TODO TODO TODO
     # write the header if its the first line of the file
     #
     if write_header:
-
+        pass
 
 
 
@@ -147,9 +148,15 @@ def crawler_root(root_path, anon_path=False, hash_content=False, ext_track=False
         stat_dict = fs_stat(item)
 
         if is_file is True:
+
             if hash_content is True and stat_dict["stat_scs"] is True:
                 hex_dig = md5_hash_content(item)
             stat_dict["is_dir"] = False
+
+            if ext_track is True and stat_dict["stat_scs"] is True:
+                ext_list = get_ext_list(item)
+                stat_dict["extents"] = ext_list
+
         else:
             stat_dict = fs_stat(item)
             stat_dict["is_dir"] = True
@@ -165,11 +172,15 @@ def crawler_root(root_path, anon_path=False, hash_content=False, ext_track=False
 
         flist.append(stat_dict)
 
+    return flist
+
 if __name__ == "__main__":
 
     hash_content = True
-    track_extents = False
-    anon_path = True
+    track_extents = True
+    anon_path = False
 
-    crawler_root("/home/",anon_path,hash_content, track_extents)
+    flist = crawler_root("/home/",anon_path,hash_content, track_extents)
 
+    for stat_dict in flist:
+        print(stat_dict)

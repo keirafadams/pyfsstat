@@ -25,6 +25,8 @@ if __name__ == "__main__":
     outpath = args.outpath
     path_root = args.path_root
 
-    crawler_root(path_root, anon_path,hsh_cont, trk_exts, outpath, buf_write)
+    flist = crawler_root(path_root, anon_path,hsh_cont, trk_exts, outpath, buf_write)
 
-    print(args)
+    for f in flist:
+        print(f)
+
