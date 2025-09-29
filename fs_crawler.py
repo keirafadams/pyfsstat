@@ -3,8 +3,19 @@ from collections import deque
 import hashlib
 from pyfiemap import get_ext_list
 
-
+# Eventually this should move to a module + _init file
 MiB_8 = 8*1048576
+fieldnames_sans_exts = ["nr_blocks", "mtime", "ctime", "atime", "blk_size", "nr_hrd_links", "sz", "stat_scs"]
+
+hdr_string = ""
+
+first_field = True
+for field in fieldnames_sans_exts:
+    if first_field is True:
+        hdr_string += field
+        first_field = False
+    else:
+        hdr_string += ",%s" % field
 
 def md5_hash_content(fpath):
     """
@@ -59,19 +70,7 @@ def fs_stat(fpath):
         stat_dict["sz"] = None
         stat_dict["stat_scs"] = False
 
-
     return stat_dict
-
-def get_extents(fpath):
-    """
-    Returns a python list of tuples,
-    representing block extent ranges affiliated with a given file
-
-    :param fpath: string, path to file
-    :return: python list of tuples
-    """
-    pass
-    #TBC, relying on code sitting on another machine I dont have access to.
 
 def anonymize_path(fpath, truncate_to=16):
     """
@@ -115,13 +114,25 @@ def writer(fhdl, write_list, write_header=False):
     :param write_list: list of file stat dicts to write
     :return: None
     """
-    # TODO TODO TODO
-    # write the header if its the first line of the file
-    #
-    if write_header:
-        pass
+    # Eventually port this to properly use the CSV module
+    # write the header (fieldnames) out. Right now avoiding cause we have some games
+    # we need to play for embedding the extent lists
+    if write_header is True:
+        fhdl.write(hdr_string + ",extents\n" )
 
+    for line_dict in write_list:
+        out_str = ""
+        for field in fieldnames_sans_exts:
+            out_str += str(line_dict[field]) + ","
 
+        #gymnastics for line extents
+        if "extents" in line_dict:
+            ext_str = ""
+            for ext in line_dict["extents"]:
+                ext_str = str(ext[0]) + "|" + str(ext[1]) + "|" + str(ext[2]) + "|" + str(ext[3]) + ":"
+            out_str += ext_str
+
+        fhdl.write(out_str+"\n")
 
 def crawler_root(root_path, anon_path=False, hash_content=False, ext_track=False, outpath="fsnap", buffered_out=False):
     """
@@ -130,7 +141,7 @@ def crawler_root(root_path, anon_path=False, hash_content=False, ext_track=False
     :param root_path: directory root to start crawl at
     :param anon_path: boolean, should path be anonymized
     :param hash_content: boolean, whether or not to hash file contents for tracking
-    :param ext_track: NOT YET IMPLEMENTED boolean, whether or not to track block file extents
+    :param ext_track: boolean, whether or not to track block file extents
     :param outpath: file to store results it
     :param buffered_out: whether or not to buffer and periodically flush stats, useful for large crawls to
     reduce memory footprint
@@ -171,6 +182,9 @@ def crawler_root(root_path, anon_path=False, hash_content=False, ext_track=False
             stat_dict["fpath"] = item
 
         flist.append(stat_dict)
+
+    fhdl = open(outpath,'w')
+    writer(fhdl,flist,True)
 
     return flist
 

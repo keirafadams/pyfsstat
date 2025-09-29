@@ -22,11 +22,7 @@ if __name__ == "__main__":
     trk_exts = args.trk_exts
     buf_write = args.buf_wrt
     hsh_cont = args.hsh_cont
-    outpath = args.outpath
+    outpath = args.outpath.strip("'")
     path_root = args.path_root
 
     flist = crawler_root(path_root, anon_path,hsh_cont, trk_exts, outpath, buf_write)
-
-    for f in flist:
-        print(f)
-
