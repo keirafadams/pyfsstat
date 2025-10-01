@@ -121,9 +121,17 @@ def get_ext_list(fpath):
     """
 
     # open descriptor read only
-    fd = os.open(fpath, os.O_RDONLY)
-    exts = fiemap_ioctl(fd)
-    os.close(fd)
+    try:
+        fd = os.open(fpath, os.O_RDONLY)
+    except:
+        return None
+
+    try:
+        exts = fiemap_ioctl(fd)
+        os.close(fd)
+    except:
+        os.close(fd)
+        return None
 
     return exts
 

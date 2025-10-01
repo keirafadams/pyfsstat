@@ -5,7 +5,7 @@ from pyfiemap import get_ext_list
 
 # Eventually this should move to a module + _init file
 MiB_8 = 8*1048576
-fieldnames_sans_exts = ["nr_blocks", "mtime", "ctime", "atime", "blk_size", "nr_hrd_links", "sz", "stat_scs"]
+fieldnames_sans_exts = ["fpath", "is_dir", "nr_blocks", "mtime", "ctime", "atime", "blk_size", "nr_hrd_links", "sz", "stat_scs"]
 
 hdr_string = ""
 
@@ -60,7 +60,7 @@ def fs_stat(fpath):
         stat_dict["nr_hrd_links"] = stat_info.st_nlink
         stat_dict["sz"] = stat_info.st_size
         stat_dict["stat_scs"] = True
-    except FileNotFoundError:
+    except (FileNotFoundError, OSError):
         stat_dict["nr_blocks"] = None
         stat_dict["mtime"] = None
         stat_dict["ctime"] = None
@@ -126,9 +126,12 @@ def writer(fhdl, write_list, write_header=False):
             out_str += str(line_dict[field]) + ","
 
         #gymnastics for line extents
-        if "extents" in line_dict:
+        if "extents" in line_dict and line_dict["extents"] is not None:
             ext_str = ""
             for ext in line_dict["extents"]:
+                if len(line_dict["extents"]) > 1:
+                    print(line_dict)
+                    exit(1)
                 ext_str = str(ext[0]) + "|" + str(ext[1]) + "|" + str(ext[2]) + "|" + str(ext[3]) + ":"
             out_str += ext_str
 
@@ -185,6 +188,7 @@ def crawler_root(root_path, anon_path=False, hash_content=False, ext_track=False
 
     fhdl = open(outpath,'w')
     writer(fhdl,flist,True)
+    fhdl.close()
 
     return flist
 

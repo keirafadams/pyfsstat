@@ -14,7 +14,7 @@ if __name__ == "__main__":
     parser.add_argument("--buf_wrt", default=False, action="store_true", help="Periodically flushes the stats list, reducing memory overhead. Useful for large file systems.")
     parser.add_argument("--anon_pth", default=False, action="store_true", help="Anonymizes file paths using SHA256, but will preserve correlation. e.g. same directory will be hashed to same value.")
     parser.add_argument("--outpath", default="metsnap" + str(datetime.now())+".csv", help="Filename to store results. If non specified will be named metsnap<curtime>.csv")
-    parser.add_argument("--path_root", required=True, type=str, help="Root directory to start the craw at")
+    parser.add_argument("--pth_root", required=True, type=str, help="Root directory to start the crawl at")
 
     args = parser.parse_args()
 
@@ -23,6 +23,6 @@ if __name__ == "__main__":
     buf_write = args.buf_wrt
     hsh_cont = args.hsh_cont
     outpath = args.outpath.strip("'")
-    path_root = args.path_root
+    path_root = args.pth_root
 
     flist = crawler_root(path_root, anon_path,hsh_cont, trk_exts, outpath, buf_write)
