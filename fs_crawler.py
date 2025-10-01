@@ -5,7 +5,7 @@ from pyfiemap import get_ext_list
 
 # Eventually this should move to a module + _init file
 MiB_8 = 8*1048576
-fieldnames_sans_exts = ["fpath", "is_dir", "nr_blocks", "mtime", "ctime", "atime", "blk_size", "nr_hrd_links", "sz", "stat_scs"]
+fieldnames_sans_exts = ["fpath", "is_dir", "nr_blocks", "mtime", "ctime", "atime", "blk_size", "nr_hrd_links", "sz", "stat_scs", "hash"]
 
 hdr_string = ""
 
@@ -109,7 +109,7 @@ def new_fs_crawler_gen(path_root):
 
 def writer(fhdl, write_list, write_header=False):
     """
-    Output Writer TBD
+    Output Writer
     :param fhdl: open python file handle
     :param write_list: list of file stat dicts to write
     :return: None
@@ -129,9 +129,6 @@ def writer(fhdl, write_list, write_header=False):
         if "extents" in line_dict and line_dict["extents"] is not None:
             ext_str = ""
             for ext in line_dict["extents"]:
-                if len(line_dict["extents"]) > 1:
-                    print(line_dict)
-                    exit(1)
                 ext_str = str(ext[0]) + "|" + str(ext[1]) + "|" + str(ext[2]) + "|" + str(ext[3]) + ":"
             out_str += ext_str
 
@@ -175,7 +172,7 @@ def crawler_root(root_path, anon_path=False, hash_content=False, ext_track=False
             stat_dict = fs_stat(item)
             stat_dict["is_dir"] = True
 
-        stat_dict["content_hash"] = hex_dig
+        stat_dict["hash"] = hex_dig
 
         if anon_path is True:
             anon_path_str = anonymize_path(item, 8)

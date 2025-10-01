@@ -46,6 +46,7 @@ last access, others full disable access time.
 * sz: reported file system size. Note this may be considerably more than the physical size on disk
 if the file system allows for sparse files.
 * stat_scs: stat success. Reports if the file or directory successfully reported from stat
+* hash: if computed, an md5 hash of the file contents
 * extents: a list of file system extents in its own format, more details are provided below
 
 ### Extent List Description
